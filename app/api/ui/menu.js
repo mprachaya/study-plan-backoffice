@@ -46,12 +46,12 @@ module.exports = [
         link: '/app/subject-grouptype',
         icon: 'ion-ios-document-outline',
       },
-      // {
-      //   key: 'subject_relations',
-      //   name: 'Subject Relations',
-      //   link: '/app/subject-relations',
-      //   icon: 'ion-ios-document-outline',
-      // },
+      {
+        key: 'studyplans',
+        name: 'Study Plans',
+        link: '/app/studyplan',
+        icon: 'ion-ios-document-outline',
+      },
     ]
   },
 ];
