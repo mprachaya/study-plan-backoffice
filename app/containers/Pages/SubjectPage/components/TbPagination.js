@@ -336,13 +336,13 @@ export default function TbPagination(props) {
 }
 TbPagination.propTypes = {
   colums: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
+  rows: PropTypes.any.isRequired,
   openFormUpdate: PropTypes.func.isRequired,
   openAlertDialog: PropTypes.func.isRequired,
   openFormCreate: PropTypes.func.isRequired,
   searchData: PropTypes.func.isRequired,
-  curriculumSelection: PropTypes.array.isRequired,
-  groupSelection: PropTypes.array.isRequired,
+  curriculumSelection: PropTypes.array,
+  groupSelection: PropTypes.array,
   refetchGroup: PropTypes.func.isRequired,
   reSubjects: PropTypes.func.isRequired,
   callBackCurriculum: PropTypes.func.isRequired,

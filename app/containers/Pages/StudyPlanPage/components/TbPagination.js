@@ -47,10 +47,10 @@ const useStyles = makeStyles()((theme) => ({
 
 export default function TbPagination(props) {
   const { classes } = useStyles();
-  const { colums, rows, openFormUpdate } = props;
-  const { openAlertDialog, openFormCreate, searchData } = props;
-  // const { SelectionMenu } = props;
-  // const { curriculumSelectionMenus, curriculumSelectionValues } = props;
+  const { colums, rows } = props;
+  const { searchData } = props;
+  const { curriculumData, handleOpen } = props;
+  const [curriculumSelection, setCurriculumSelection] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [columSelected, setColumSeleted] = React.useState();
@@ -59,9 +59,8 @@ export default function TbPagination(props) {
   const [data, setData] = React.useState([]);
   const [dataLength, setDataLenght] = React.useState(0);
   const [textSearch, setTextSearch] = React.useState('');
-  // const [uniqueSelection, setUniqueSelectiom] = React.useState([]);
   const [state, setState] = React.useState({
-    curriculum_id: 1,
+    curriculum_id: 0,
     group_type_id: 0,
     subject_code: '',
     subject_name_th: '',
@@ -93,6 +92,13 @@ export default function TbPagination(props) {
       ...state,
       [event.target.name]: event.target.value
     });
+    if (event.target.value !== 0) {
+      const dataFilter = rows.filter(element => element.curriculum_id === event.target.value);
+      console.log('Filter', dataFilter);
+      setData(dataFilter);
+    } else {
+      setData(rows);
+    }
   };
 
   const handleSort = (header) => {
@@ -124,6 +130,16 @@ export default function TbPagination(props) {
       }
     }
   };
+
+  useEffect(() => {
+    if (curriculumData !== undefined) {
+      setCurriculumSelection(curriculumData);
+    }
+  }, [curriculumData]);
+
+  useEffect(() => {
+    console.log('Curriculum =', curriculumSelection);
+  }, [curriculumSelection]);
 
   useEffect(() => {
     if (rows) {
@@ -174,7 +190,7 @@ export default function TbPagination(props) {
           color='primary'
           disableRipple
           className={classes.searchButton}
-          onClick={openFormCreate}>
+          onClick={() => handleOpen('create')}>
           Create Plan
         </Button>
       </Box>
@@ -197,18 +213,12 @@ export default function TbPagination(props) {
             id={'curriculum_id'}
             defaultValue={''}
             className={classes.selectEmpty}>
-            <MenuItem key={3} value={3}>หลักสูตร วศ.บ 2565</MenuItem>
-            <MenuItem key={2} value={2}>หลักสูตร วศ.บ 2560</MenuItem>
-            <MenuItem key={1} value={1}>หลักสูตร วศ.บ 2555</MenuItem>
-            {/* {curriculumSelectionMenus?.map((value) => (
-              <MenuItem key={value}>{value}</MenuItem>
-            ))};
-            {curriculumSelectionValues?.map((value) => (
-              <MenuItem key={value}>{value}</MenuItem>
-            ))}; */}
-            {/* {curriculumSelection !== undefined ? Object.values(curriculumSelection).map((crMenu) => (
-              <MenuItem key={crMenu.curriculum_id} value={crMenu.curriculum_id}>{crMenu.curriculum_name_th}({crMenu.curriculum_year})</MenuItem>
-            )) : null} */}
+            <MenuItem key={0} value={0}>แสดงทั้งหมด</MenuItem>
+            {curriculumSelection !== undefined ? curriculumSelection?.map((menu) => (
+              <MenuItem key={menu.curriculum_id} value={menu.curriculum_id}>{menu.group_short_name_th + ' ' + menu.curriculum_year}</MenuItem>
+            ))
+              : <MenuItem key={0} value={0}>ไม่มีหลักสูตร</MenuItem>
+            }
           </Select>
         </FormControl>
       </Box>
@@ -266,10 +276,8 @@ export default function TbPagination(props) {
                         <Button
                           variant='contained'
                           onClick={() => (
-                            openFormUpdate(
-                              row.subject_category_id,
-                              row.subject_category_name
-                            ))
+                            handleOpen('update')
+                          )
                           }>
                           edit
                         </Button>
@@ -278,10 +286,8 @@ export default function TbPagination(props) {
                         <Button
                           variant='outlined'
                           onClick={() => (
-                            openAlertDialog(
-                              row.subject_category_id,
-                              row.subject_category_name
-                            ))
+                            handleOpen('delete')
+                          )
                           }>
                           delete
                         </Button>
@@ -289,7 +295,7 @@ export default function TbPagination(props) {
                       <TableCell
                         component='th'
                         scope='row'>
-                        {row.curriculum_name_th}
+                        {row.group_short_name_th + ' ' + row.curriculum_year}
                       </TableCell>
                       <TableCell
                         component='th'
@@ -325,19 +331,9 @@ export default function TbPagination(props) {
   );
 }
 TbPagination.propTypes = {
-  // colums: PropTypes.array.isRequired,
-  // rows: PropTypes.object.isRequired,
-  // openFormUpdate: PropTypes.func.isRequired,
-  // openAlertDialog: PropTypes.func.isRequired,
-  // openFormCreate: PropTypes.func.isRequired,
-  // searchData: PropTypes.func.isRequired,
   colums: PropTypes.array,
   rows: PropTypes.array,
-  openFormUpdate: PropTypes.func,
-  openAlertDialog: PropTypes.func,
-  openFormCreate: PropTypes.func,
   searchData: PropTypes.func,
-  // SelectionMenu: PropTypes.any,
-  // curriculumSelectionMenus: PropTypes.any,
-  // curriculumSelectionValues: PropTypes.any,
+  curriculumData: PropTypes.any,
+  handleOpen: PropTypes.any,
 };

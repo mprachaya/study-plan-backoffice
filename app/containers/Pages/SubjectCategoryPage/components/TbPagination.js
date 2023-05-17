@@ -209,7 +209,7 @@ export default function TbPagination(props) {
 }
 TbPagination.propTypes = {
   colums: PropTypes.array.isRequired,
-  rows: PropTypes.object.isRequired,
+  rows: PropTypes.any.isRequired,
   openFormUpdate: PropTypes.func.isRequired,
   openAlertDialog: PropTypes.func.isRequired,
   openFormCreate: PropTypes.func.isRequired,
