@@ -1,4 +1,3 @@
-import { Helmet } from 'react-helmet';
 import React, { useEffect } from 'react';
 import { PapperBlock } from 'dan-components';
 import TbPagination from './components/TbPagination';
@@ -6,8 +5,6 @@ import useFetch from '../../../hooks/useFetch';
 import url from '../../../api/url/partSetup';
 
 function StudyPlanPage() {
-  const title = '';
-  const description = 'ssss';
   const columsName = [
     { name: 'CURRICULUM', column: 'curriculum_name', type: 'string' },
     { name: 'PLAN NAME', column: 'study_plan_name', type: 'string' },
@@ -53,29 +50,6 @@ function StudyPlanPage() {
 
   return (
     <div>
-      <Helmet>
-        <title>{title}</title>
-        <meta
-          name='description'
-          content={description}
-        />
-        <meta
-          property='og:title'
-          content={title}
-        />
-        <meta
-          property='og:description'
-          content={description}
-        />
-        <meta
-          property='twitter:title'
-          content={title}
-        />
-        <meta
-          property='twitter:description'
-          content={description}
-        />
-      </Helmet>
       <PapperBlock
         title='Study Plans'
         desc='Some text description'>

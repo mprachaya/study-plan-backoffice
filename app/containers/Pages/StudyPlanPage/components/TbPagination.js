@@ -60,15 +60,15 @@ export default function TbPagination(props) {
   const [dataLength, setDataLenght] = React.useState(0);
   const [textSearch, setTextSearch] = React.useState('');
   // const [uniqueSelection, setUniqueSelectiom] = React.useState([]);
-  // const [state, setState] = React.useState({
-  //   curriculum_id: 1,
-  //   group_type_id: 0,
-  //   subject_code: '',
-  //   subject_name_th: '',
-  //   subject_name_en: '',
-  //   credit_qty: 3,
-  //   subject_description: '',
-  // });
+  const [state, setState] = React.useState({
+    curriculum_id: 1,
+    group_type_id: 0,
+    subject_code: '',
+    subject_name_th: '',
+    subject_name_en: '',
+    credit_qty: 3,
+    subject_description: '',
+  });
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -88,12 +88,12 @@ export default function TbPagination(props) {
     console.log(textSearch);
   };
 
-  // const handleChange = (event) => {
-  //   setState({
-  //     ...state,
-  //     [event.target.name]: event.target.value
-  //   });
-  // };
+  const handleChange = (event) => {
+    setState({
+      ...state,
+      [event.target.name]: event.target.value
+    });
+  };
 
   const handleSort = (header) => {
     setColumSeleted(header.column);
@@ -191,13 +191,15 @@ export default function TbPagination(props) {
           <InputLabel htmlFor='curriculum_id'>Curriculum</InputLabel>
           <Select
             variant='standard'
-            // value={state.curriculum_id}
-            // onChange={(e) => handleChange(e)}
+            value={state.curriculum_id}
+            onChange={(e) => handleChange(e)}
             name={'curriculum_id'}
             id={'curriculum_id'}
             defaultValue={''}
             className={classes.selectEmpty}>
-            <MenuItem key={1} value={1}>test</MenuItem>
+            <MenuItem key={3} value={3}>หลักสูตร วศ.บ 2565</MenuItem>
+            <MenuItem key={2} value={2}>หลักสูตร วศ.บ 2560</MenuItem>
+            <MenuItem key={1} value={1}>หลักสูตร วศ.บ 2555</MenuItem>
             {/* {curriculumSelectionMenus?.map((value) => (
               <MenuItem key={value}>{value}</MenuItem>
             ))};
@@ -217,41 +219,41 @@ export default function TbPagination(props) {
             aria-labelledby='tableTitle'
             size='medium'
             aria-label='enhanced table'>
-            <TableRow>
-              <TableCell align='left'>EDIT</TableCell>
-              <TableCell align='left'>DELETE</TableCell>
-              {colums.map((columName, index) => (
-                index === 0 ? (
-                  <TableCell
-                    onClick={() => handleSort(columName)}
-                    key={columName.column}
-                    id={index}
-                    component='th'
-                    scope='row'>
-                    {columName.name}
-                    {columSelected === columName.column && toggle === false ? (
-                      <KeyboardArrowUpIcon />
-                    ) : (
-                      <KeyboardArrowDownIcon />
-                    )}
-                  </TableCell>
-                ) : (
-                  <TableCell
-                    onClick={() => handleSort(columName)}
-                    key={columName.column}
-                    id={index}
-                    align='left'>
-                    {columName.name}
-                    {columSelected === columName.column && toggle === false ? (
-                      <KeyboardArrowUpIcon />
-                    ) : (
-                      <KeyboardArrowDownIcon />
-                    )}
-                  </TableCell>
-                ))
-              )}
-            </TableRow>
             <TableBody>
+              <TableRow>
+                <TableCell align='left'>EDIT</TableCell>
+                <TableCell align='left'>DELETE</TableCell>
+                {colums.map((columName, index) => (
+                  index === 0 ? (
+                    <TableCell
+                      onClick={() => handleSort(columName)}
+                      key={columName.column}
+                      id={index}
+                      component='th'
+                      scope='row'>
+                      {columName.name}
+                      {columSelected === columName.column && toggle === false ? (
+                        <KeyboardArrowUpIcon />
+                      ) : (
+                        <KeyboardArrowDownIcon />
+                      )}
+                    </TableCell>
+                  ) : (
+                    <TableCell
+                      onClick={() => handleSort(columName)}
+                      key={columName.column}
+                      id={index}
+                      align='left'>
+                      {columName.name}
+                      {columSelected === columName.column && toggle === false ? (
+                        <KeyboardArrowUpIcon />
+                      ) : (
+                        <KeyboardArrowDownIcon />
+                      )}
+                    </TableCell>
+                  ))
+                )}
+              </TableRow>
               {dataLength !== 0 && (
                 Object.values(data)
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)

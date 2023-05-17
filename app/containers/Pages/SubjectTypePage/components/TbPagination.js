@@ -148,7 +148,6 @@ export default function TbPagination(props) {
         >
           Create Subject Type
         </Button>
-
       </Box>
       <Paper className={classes.paper}>
         <TableContainer>
@@ -158,16 +157,16 @@ export default function TbPagination(props) {
             size="medium"
             aria-label="enhanced table"
           >
-            <TableRow >
-              <TableCell align="left">EDIT</TableCell>
-              <TableCell align="left">DELETE</TableCell>
-              {colums.map((columName, index) => (
-                index === 0 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
-                  : <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
-              )
-              )}
-            </TableRow>
             <TableBody>
+              <TableRow >
+                <TableCell align="left">EDIT</TableCell>
+                <TableCell align="left">DELETE</TableCell>
+                {colums.map((columName, index) => (
+                  index === 0 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                    : <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                )
+                )}
+              </TableRow>
               {dataLength !== 0 && Object.values(data)
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {

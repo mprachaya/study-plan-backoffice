@@ -257,7 +257,6 @@ export default function TbPagination(props) {
           {totalLable}
         </Box>
       </Box>
-
       <Paper className={classes.paper}>
         <TableContainer>
           <Table
@@ -265,19 +264,19 @@ export default function TbPagination(props) {
             aria-labelledby="tableTitle"
             size="medium"
             aria-label="enhanced table">
-            {data !== undefined
-              ? <TableRow sx={{ margin: 2 }}>
-                <TableCell align="left">EDIT</TableCell>
-                <TableCell align="left">DELETE</TableCell>
-                {colums.map((columName, index) => (
-                  index === 0 && index !== colums.length ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
-                    : index !== colums.length - 1 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
-                      : index === colums.length - 1 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell> : null
-                )
-                )}
-              </TableRow>
-              : null}
             <TableBody>
+              {data !== undefined
+                ? <TableRow sx={{ margin: 2 }}>
+                  <TableCell align="left">EDIT</TableCell>
+                  <TableCell align="left">DELETE</TableCell>
+                  {colums.map((columName, index) => (
+                    index === 0 && index !== colums.length ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                      : index !== colums.length - 1 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                        : index === colums.length - 1 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell> : null
+                  )
+                  )}
+                </TableRow>
+                : null}
               {dataLength !== 0 && data !== undefined ? Object.values(data)
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
