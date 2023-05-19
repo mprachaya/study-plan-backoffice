@@ -47,9 +47,9 @@ const useStyles = makeStyles()((theme) => ({
 
 export default function TbPagination(props) {
   const { classes } = useStyles();
-  const { colums, rows } = props;
-  const { searchData } = props;
-  const { curriculumData, handleOpen } = props;
+  const { colums, rows, openAlertDialog } = props;
+  // const { searchData } = props;
+  const { curriculumData, openUpdateDialog, openCreateDialog } = props;
   const [curriculumSelection, setCurriculumSelection] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -82,11 +82,6 @@ export default function TbPagination(props) {
     setTextSearch(event.target.value);
   };
 
-  const handleClickSearch = () => {
-    searchData('search', textSearch);
-    console.log(textSearch);
-  };
-
   const handleChange = (event) => {
     setState({
       ...state,
@@ -108,19 +103,18 @@ export default function TbPagination(props) {
       if (header.type === 'int') {
         setData(data.sort((a, b) => a[header.column] - b[header.column]));
         setSort('desc');
-        // console.log('sort int asc :', header.column);
+        console.log('sort int asc :', header.column);
       } else if (header.type === 'string') {
         setData(
           data.sort((a, b) => (a[header.column] > b[header.column] ? 1 : -1))
         );
         setSort('desc');
-        // console.log('sort string asc :', header.column);
       }
     } else if (sort === 'desc') {
       if (header.type === 'int') {
         setData(data.sort((a, b) => b[header.column] - a[header.column]));
         setSort('asc');
-        // console.log('sort int desc :', header.column);
+        console.log('sort int desc :', header.column);
       } else if (header.type === 'string') {
         setData(
           data.sort((a, b) => (a[header.column] > b[header.column] ? -1 : 1))
@@ -129,6 +123,11 @@ export default function TbPagination(props) {
         // console.log('sort string desc :', header.column);
       }
     }
+  };
+
+  const handleClickSearch = () => {
+    // searchData('search', textSearch);
+    console.log(textSearch);
   };
 
   useEffect(() => {
@@ -190,7 +189,7 @@ export default function TbPagination(props) {
           color='primary'
           disableRipple
           className={classes.searchButton}
-          onClick={() => handleOpen('create')}>
+          onClick={() => openCreateDialog('create')}>
           Create Plan
         </Button>
       </Box>
@@ -213,12 +212,26 @@ export default function TbPagination(props) {
             id={'curriculum_id'}
             defaultValue={''}
             className={classes.selectEmpty}>
-            <MenuItem key={0} value={0}>แสดงทั้งหมด</MenuItem>
-            {curriculumSelection !== undefined ? curriculumSelection?.map((menu) => (
-              <MenuItem key={menu.curriculum_id} value={menu.curriculum_id}>{menu.group_short_name_th + ' ' + menu.curriculum_year}</MenuItem>
-            ))
-              : <MenuItem key={0} value={0}>ไม่มีหลักสูตร</MenuItem>
-            }
+            <MenuItem
+              key={0}
+              value={0}>
+              แสดงทั้งหมด
+            </MenuItem>
+            {curriculumSelection !== undefined ? (
+              curriculumSelection?.map((menu) => (
+                <MenuItem
+                  key={menu.curriculum_id}
+                  value={menu.curriculum_id}>
+                  {menu.group_short_name_th + ' ' + menu.curriculum_year}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem
+                key={0}
+                value={0}>
+                ไม่มีหลักสูตร
+              </MenuItem>
+            )}
           </Select>
         </FormControl>
       </Box>
@@ -233,8 +246,8 @@ export default function TbPagination(props) {
               <TableRow>
                 <TableCell align='left'>EDIT</TableCell>
                 <TableCell align='left'>DELETE</TableCell>
-                {colums.map((columName, index) => (
-                  index === 0 ? (
+                {colums.map((columName, index) => (index === 0
+                  ? (
                     <TableCell
                       onClick={() => handleSort(columName)}
                       key={columName.column}
@@ -242,11 +255,12 @@ export default function TbPagination(props) {
                       component='th'
                       scope='row'>
                       {columName.name}
-                      {columSelected === columName.column && toggle === false ? (
-                        <KeyboardArrowUpIcon />
-                      ) : (
-                        <KeyboardArrowDownIcon />
-                      )}
+                      {columSelected === columName.column
+                      && toggle === false ? (
+                          <KeyboardArrowUpIcon />
+                        ) : (
+                          <KeyboardArrowDownIcon />
+                        )}
                     </TableCell>
                   ) : (
                     <TableCell
@@ -255,16 +269,17 @@ export default function TbPagination(props) {
                       id={index}
                       align='left'>
                       {columName.name}
-                      {columSelected === columName.column && toggle === false ? (
-                        <KeyboardArrowUpIcon />
-                      ) : (
-                        <KeyboardArrowDownIcon />
-                      )}
+                      {columSelected === columName.column
+                      && toggle === false ? (
+                          <KeyboardArrowUpIcon />
+                        ) : (
+                          <KeyboardArrowDownIcon />
+                        )}
                     </TableCell>
-                  ))
-                )}
+                  )
+                ))}
               </TableRow>
-              {dataLength !== 0 && (
+              {dataLength !== 0 ? (
                 Object.values(data)
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
@@ -275,18 +290,19 @@ export default function TbPagination(props) {
                       <TableCell align='left'>
                         <Button
                           variant='contained'
-                          onClick={() => (
-                            handleOpen('update')
-                          )
-                          }>
+                          onClick={() => openUpdateDialog(row.study_plan_id, row.study_plan_name, row.curriculum_id, row.group_short_name_th + ' ' + row.curriculum_year, row.study_plan_version)}>
                           edit
                         </Button>
                       </TableCell>
                       <TableCell align='left'>
                         <Button
                           variant='outlined'
-                          onClick={() => (
-                            handleOpen('delete')
+                          onClick={() => openAlertDialog(
+                            row.study_plan_id,
+                            row.study_plan_name,
+                            row.group_short_name_th
+                            + ' '
+                            + row.curriculum_year
                           )
                           }>
                           delete
@@ -307,8 +323,17 @@ export default function TbPagination(props) {
                         scope='row'>
                         {row.study_plan_version}
                       </TableCell>
-                    </TableRow>)
-                  ))}
+                    </TableRow>
+                  ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    sx={{ textAlign: 'center' }}>
+                    ไม่ข้อมูลแผนการเรียนแนะนำ
+                  </TableCell>
+                </TableRow>
+              )}
               {emptyRows > 0 && (
                 <TableRow>
                   <TableCell colSpan={6} />
@@ -335,5 +360,7 @@ TbPagination.propTypes = {
   rows: PropTypes.array,
   searchData: PropTypes.func,
   curriculumData: PropTypes.any,
-  handleOpen: PropTypes.any,
+  openCreateDialog: PropTypes.func,
+  openUpdateDialog: PropTypes.func,
+  openAlertDialog: PropTypes.func.isRequired,
 };

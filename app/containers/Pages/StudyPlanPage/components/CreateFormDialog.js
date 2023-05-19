@@ -13,7 +13,7 @@ import InputLabel from '@mui/material/InputLabel';
 import PropTypes from 'prop-types';
 
 export default function CreateFormDialog(props) {
-  const { open, handleClose } = props;
+  const { open, handleClose, handleCreate } = props;
   const { curriculum, data } = props;
   const { handleSnackbar } = props;
   // const { handleSnackbar, handleCreate, SubjectTypeSelection } = props;
@@ -74,12 +74,12 @@ export default function CreateFormDialog(props) {
   // }, [state]);
 
   const validationForm = () => {
-    if (state.planName === '') {
+    if (state.planName === '' || state.planName === undefined) {
       setValidate((pre) => ({
         ...pre, planName: true
       }));
     } else {
-      // handleCreate(state);
+      handleCreate(state);
       handleSnackbar('create');
       handleClose();
     }
