@@ -18,6 +18,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -278,6 +280,7 @@ export default function TbPagination(props) {
                     </TableCell>
                   )
                 ))}
+                <TableCell align='center'><SettingsIcon/></TableCell>
               </TableRow>
               {dataLength !== 0 ? (
                 Object.values(data)
@@ -322,6 +325,17 @@ export default function TbPagination(props) {
                         component='th'
                         scope='row'>
                         {row.study_plan_version}
+                      </TableCell>
+                      <TableCell
+                        align='center'>
+                        <Link to='/app/planmanagement'>
+                          <Button
+                            variant='text'
+                            onClick={() => localStorage.setItem('plan_name', JSON.stringify(row.group_short_name_th + ' ' + row.curriculum_year + ` ( VERSION ${row.study_plan_version} )`))}
+                          >
+                            ...
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))

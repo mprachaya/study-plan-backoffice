@@ -8,6 +8,10 @@ export const BlankPage = loadable(() =>
   import('./Pages/BlankPage'), {
   fallback: <Loading />,
 });
+export const PlanManagement = loadable(() =>
+  import('./Pages/StudyPlanPage/components/PlanManagement'), {
+  fallback: <Loading />,
+});
 export const StudyPlanPage = loadable(() =>
   import('./Pages/StudyPlanPage'), {
   fallback: <Loading />,
