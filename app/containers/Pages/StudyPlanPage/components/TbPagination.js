@@ -71,6 +71,12 @@ export default function TbPagination(props) {
     subject_description: '',
   });
 
+  const passToPlanManagement = (row) => {
+    localStorage.setItem('plan_name', JSON.stringify(row.group_short_name_th + ' ' + row.curriculum_year + ` ( VERSION ${row.study_plan_version} )`));
+    localStorage.setItem('curriculum_id', JSON.stringify(row.curriculum_id));
+    localStorage.setItem('study_plan_id', JSON.stringify(row.study_plan_id));
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -331,7 +337,7 @@ export default function TbPagination(props) {
                         <Link to='/app/planmanagement'>
                           <Button
                             variant='text'
-                            onClick={() => localStorage.setItem('plan_name', JSON.stringify(row.group_short_name_th + ' ' + row.curriculum_year + ` ( VERSION ${row.study_plan_version} )`))}
+                            onClick={() => passToPlanManagement(row)}
                           >
                             ...
                           </Button>
