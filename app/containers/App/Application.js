@@ -13,6 +13,7 @@ import {
   GroupTypePage,
   StudyPlanPage,
   PlanManagement,
+  PlanDetailPage
   // RelationPage,
   // DashboardPage
 } from '../pageListAsync';
@@ -31,8 +32,9 @@ function Application(props) {
         <Route path="/app/subject-category" component={SubjectCategoryPage} />
         <Route path="/app/subject-type" component={SubjectTypePage} />
         <Route path="/app/subject-grouptype" component={GroupTypePage} />
+        <Route path="/app/studyplan/planmanagement" component={PlanManagement} />
+        <Route path="/app/studyplan/plandetail" component={PlanDetailPage} />
         <Route path="/app/studyplan" component={StudyPlanPage} />
-        <Route path="/app/planmanagement" component={PlanManagement} />
         {/* <Route path="/app/subject-relations" component={RelationPage} /> */}
         {/* <Route exact path="/app/blank-page" component={BlankPage} /> */}
         {/* <Route path="/app/pages/dashboard" component={DashboardPage} /> */}

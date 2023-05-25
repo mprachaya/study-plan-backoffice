@@ -14,49 +14,58 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import axios from 'axios';
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import SearchIcon from '@mui/icons-material/Search';
 import useFetch from '../../../../hooks/useFetch';
 import url from '../../../../api/url/partSetup';
-// import PropTypes from 'prop-types';
 
 function PlanManagement() {
   const planName = JSON.parse(localStorage.getItem('plan_name'));// Get plan name
+  const planId = JSON.parse(localStorage.getItem('study_plan_id'));// Get plan id
   const [year, setYear] = useState(1);
   const [semester, setSemester] = useState(1);
   const [tabValue, setTabValue] = useState(1);
   const [menuSubjects, setMenuSubjects] = useState([]);
   const [subStudy, setSubStudy] = useState([]);
   const [textSearch, setTextSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(1);
-  const page = [
-    {
-      key: 'content 1', pageValue: 1, year: 1, semester: 1
-    },
-    {
-      key: 'content 2', pageValue: 2, year: 1, semester: 2
-    },
-    {
-      key: 'content 3', pageValue: 3, year: 2, semester: 1
-    },
-    {
-      key: 'content 4', pageValue: 4, year: 2, semester: 2
-    },
-    {
-      key: 'content 5', pageValue: 5, year: 3, semester: 1
-    },
-    {
-      key: 'content 6', pageValue: 6, year: 3, semester: 2
-    },
-    {
-      key: 'content7', pageValue: 7, year: 4, semester: 1
-    },
-    {
-      key: 'content 8', pageValue: 8, year: 4, semester: 2
-    }];
-  const { resData: Subjects } = useFetch(`${url.apiPart + 'subjects'}`, { curriculum_id: JSON.parse(localStorage.getItem('curriculum_id')), subject_id: '' });
-  const { resData: SubPlan, refetch: reSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: 1, sub_study_year: 1 });
+  const [dynamicTab, setDynamicTab] = useState(1);
+  const [totalCredit, setTotalCredit] = useState(0);
+  const { resData: Subjects } = useFetch(`${url.apiPart + 'subjects'}`, { curriculum_id: JSON.parse(localStorage.getItem('curriculum_id')), subject_id: '' }); // for add selection
+  const { resData: SubPlan, refetch: reSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: 1, sub_study_year: 1 }); // select subplan by semester and year by studyplan
+  const { resData: AllSubPlan, refetch: reAllSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' }); // select all subplan by studyplan to make add menu filter
+
+  const handleAddSubStudy = (id) => {
+    axios.post(url.apiPart + 'substudy_create',
+      {
+        study_plan_id: planId,
+        subject_id: id,
+        sub_study_semester: semester,
+        sub_study_year: year
+      }).then(res => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    }).finally(() => {
+      reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
+      reAllSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' });
+    });
+  };
+
+  const handleDeleteSubStudy = (subId) => {
+    axios.post(url.apiPart + 'substudy_delete',
+      {
+        sub_study_id: subId,
+      }).then(res => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    }).finally(() => {
+      reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
+      reAllSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' });
+    });
+  };
 
   const handleChangeTabs = (event, newValue) => {
     setTabValue(newValue);
@@ -66,47 +75,48 @@ function PlanManagement() {
     setTextSearch(e.target.value);
   };
 
-  const getCurrentPosition = (positionYear, positionSemester) => {
+  const getCurrentPosition = (positionYear, positionSemester, value) => {
     setYear(positionYear);
     setSemester(positionSemester);
+    setDynamicTab(value);
   };
-
-  useEffect(() => {
-    setIsLoading(1);
-  }, []);
 
   useEffect(() => {
     reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
   }, [tabValue]);
 
   useEffect(() => {
-    if (Subjects !== undefined) {
-      console.log(Subjects.data);
-      setMenuSubjects(Subjects.data);
+    if (Subjects.data !== undefined) {
+      console.log('Subjects: ', Subjects.data);
+      if (AllSubPlan.data !== undefined) {
+        const filterMenu = (Subjects.data).filter(raw => !(AllSubPlan.data).find((data) => raw.subject_id === data.subject_id));
+        console.log('AllSubPlan: ', AllSubPlan.data);
+        console.log('filterMenu: ', filterMenu);
+        setMenuSubjects(filterMenu);
+      }
     }
-  }, [Subjects]);
+  }, [Subjects, AllSubPlan]);
 
   useEffect(() => {
     if (SubPlan !== undefined) {
-      setIsLoading(1);
-      // console.log(SubPlan.data);
       console.log('Year: ' + year + ' Semester: ' + semester);
       setSubStudy(SubPlan.data);
     }
   }, [SubPlan]);
 
   useEffect(() => {
-    console.log(subStudy);
+    if (subStudy !== undefined) {
+      console.log(subStudy);
+      setTotalCredit(subStudy.reduce((prev, current) => prev + current.credit_qty, 0));
+      // setTotalCredit(1);
+    } else {
+      setTotalCredit(0);
+    }
   }, [subStudy]);
 
-  // loading effect timeout
   useEffect(() => {
-    if (isLoading) {
-      setTimeout(() => {
-        setIsLoading(0);
-      }, 1000);
-    }
-  }, [isLoading]);
+    console.log(totalCredit);
+  }, [totalCredit]);
 
   return (
     <PapperBlock title="Plan Management" desc={ 'หน้าจัดการแผนการเรียนแนะนำ มคอ.2' }>
@@ -136,201 +146,173 @@ function PlanManagement() {
             }}>
             <TabList
               onChange={handleChangeTabs}>
-              {page.map((m) => (
-                <Tab onClick={() => getCurrentPosition(m.year, m.semester)} key={m.pageValue} label={`ปี ${m.year}/เทอม${m.semester}`} value={(m.pageValue).toString()}/>
-              ))}
+              <Tab onClick={() => getCurrentPosition(1, 1, 1)} key={1} label={'ปี 1/เทอม1'} value={(1).toString()}/>
+              <Tab onClick={() => getCurrentPosition(1, 2, 2)} key={2} label={'ปี 1/เทอม2'} value={(2).toString()}/>
+              <Tab onClick={() => getCurrentPosition(2, 1, 3)} key={3} label={'ปี 2/เทอม1'} value={(3).toString()}/>
+              <Tab onClick={() => getCurrentPosition(2, 2, 4)} key={4} label={'ปี 2/เทอม2'} value={(4).toString()}/>
+              <Tab onClick={() => getCurrentPosition(3, 1, 5)} key={5} label={'ปี 3/เทอม1'} value={(5).toString()}/>
+              <Tab onClick={() => getCurrentPosition(3, 2, 6)} key={6} label={'ปี 3/เทอม2'} value={(6).toString()}/>
+              <Tab onClick={() => getCurrentPosition(4, 1, 7)} key={7} label={'ปี 4/เทอม1'} value={(7).toString()}/>
+              <Tab onClick={() => getCurrentPosition(4, 2, 8)} key={8} label={'ปี 4/เทอม2'} value={(8).toString()}/>
             </TabList>
           </Box>
-          {page.map((tab) => (
-            <TabPanel key={tab.key} value={tab.pageValue.toString()}>
+          <TabPanel key={dynamicTab} value={(dynamicTab).toString()}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-evenly',
+                height: '450px',
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
-                  justifyContent: 'space-evenly',
-                  height: '450px',
+                  flexDirection: 'column',
+                  p: 4,
+                  m: 2,
+                  width: '400px',
+                  boxShadow: 4,
+                  borderRadius: 2,
+                }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    height: '40px',
+                  }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 'bold',
+                      color: 'black',
+                      opacity: '80%',
+                      my: 2,
+                      ml: 2,
+                    }}
+                  >
+                    Subjects
+                  </Typography>
+                  <Box>
+                    <SearchIcon
+                      sx={{
+                        my: 2,
+                        mr: 1.5,
+                        color: 'grey',
+                        fontSize: 22
+                      }}/>
+                    <TextField
+                      size='small'
+                      variant= "filled"
+                      label= "code, name"
+                      value={textSearch}
+                      onChange={(e) => handleChange(e)}
+                      InputProps={{
+                        endAdornment: (
+                          <IconButton onClick={() => setTextSearch('')}>
+                            {textSearch !== '' ? <ClearOutlinedIcon/> : ''}
+                          </IconButton>
+                        )
+                      }}
+                      sx={{
+                        width: '160px',
+                        borderRadius: 2,
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    width: '100%',
+                    overflow: 'auto',
+                    my: 2,
+                  }}>
+                  <MenuList>
+                    {menuSubjects ? menuSubjects.filter(raw => raw.subject_code.includes(textSearch) || raw.subject_name_th.includes(textSearch)).map((menu) => (
+                      <ListItem key={menu.subject_id}>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            boxShadow: 1,
+                            p: 1.5,
+                          }}>
+                          <Typography>{menu.subject_code + ' ' + menu.subject_name_th}</Typography>
+                          <Button onClick={() => handleAddSubStudy(menu.subject_id)}>+</Button>
+                        </Box>
+                      </ListItem>
+                    ))
+                      : (
+                        <ListItem>
+                          <Box
+                            sx={{
+                              width: '100%',
+                              display: 'flex',
+                              justifyContent: 'space-between'
+                            }}>
+                            <Typography>ไม่มีรายวิชาในหลักสูตร</Typography>
+                          </Box>
+                        </ListItem>
+                      )
+                    }
+                  </MenuList>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  p: 2,
+                  m: 2,
+                  width: '600px',
+                  borderRadius: 2,
                 }}
               >
                 <Box
                   sx={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    p: 4,
-                    m: 2,
-                    width: '400px',
-                    boxShadow: 4,
-                    borderRadius: 2,
-                  }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      height: '40px',
-                    }}>
-                    <Typography
-                      sx={{
-                        fontWeight: 'bold',
-                        color: 'black',
-                        opacity: '80%',
-                        my: 2,
-                        ml: 2,
-                      }}
-                    >
-                      Subjects
-                    </Typography>
-                    <Box>
-                      <SearchIcon
-                        sx={{
-                          my: 2,
-                          mr: 1.5,
-                          color: 'grey',
-                          fontSize: 22
-                        }}/>
-                      <TextField
-                        size='small'
-                        variant= "filled"
-                        label= "code, name"
-                        value={textSearch}
-                        onChange={(e) => handleChange(e)}
-                        InputProps={{
-                          endAdornment: (
-                            <IconButton onClick={() => setTextSearch('')}>
-                              {textSearch !== '' ? <ClearOutlinedIcon/> : ''}
-                            </IconButton>
-                          )
-                        }}
-                        sx={{
-                          width: '160px',
-                          borderRadius: 2,
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      overflow: 'auto',
-                      my: 2,
-                    }}>
-                    <MenuList>
-                      {menuSubjects ? menuSubjects.filter(raw => raw.subject_code.includes(textSearch) || raw.subject_name_th.includes(textSearch)).map((menu) => (
-                        <ListItem key={menu.subject_id}>
-                          <Box
-                            sx={{
-                              width: '100%',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              boxShadow: 1,
-                              p: 1.5,
-                            }}>
-                            <Typography>{menu.subject_code + ' ' + menu.subject_name_th}</Typography>
-                            <Button>+</Button>
-                          </Box>
-                        </ListItem>
-                      ))
-                        : (
-                          <ListItem>
-                            <Box
-                              sx={{
-                                width: '100%',
-                                display: 'flex',
-                                justifyContent: 'space-between'
-                              }}>
-                              <Typography>ไม่มีรายวิชาในหลักสูตร</Typography>
-                            </Box>
-                          </ListItem>
-                        )
-                      }
-                    </MenuList>
-                  </Box>
+                    width: '100%',
+                  }}
+                >
+                  <Typography fontWeight={'bold'} fontSize={14}>Plan Lists</Typography>
+                  <Typography mx={2} fontSize={14}>Total {totalCredit} credit</Typography>
                 </Box>
                 <Box
                   sx={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    p: 2,
-                    m: 2,
-                    width: '600px',
-                    borderRadius: 2,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      width: '100%',
-                    }}
-                  >
-                    <Typography fontWeight={'bold'} fontSize={14}>Plan Lists</Typography>
-                    <Typography mx={2} fontSize={14}>Total 0 credit</Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      width: '100%',
-                    }}>
-                    {isLoading
-                      ? <Typography>is Loading...</Typography>
-                      : <TableContainer>
-                        <Table>
-                          <tbody>
-                            <TableRow sx={{ margin: 2 }}>
-                              <TableCell align='left'>
-                                <Typography fontSize={14} fontWeight={'bold'}>REMOVE</Typography>
-                              </TableCell>
-                              <TableCell align='left'>code</TableCell>
-                              <TableCell align='left'>name</TableCell>
-                              <TableCell align='left'>credit</TableCell>
-                            </TableRow>
-                            {subStudy ? subStudy.map((substd) => (
-                              <TableRow key={substd.sub_study_id} sx={{ margin: 2 }}>
-                                <TableCell align='left'>
-                                  <Button variant='outlined'>X</Button>
-                                </TableCell>
-                                <TableCell align='left'>{substd.subject_code}</TableCell>
-                                <TableCell align='left'>{substd.subject_name_th}</TableCell>
-                                <TableCell align='left'>{substd.credit_qty}</TableCell>
-                              </TableRow>
-                            ))
-                              : <TableRow><TableCell colSpan={3}>ยังไม่มีรายวิชาในแผนการเรียนแนะนำ</TableCell></TableRow>
-                            }
-                          </tbody>
-                        </Table>
-                      </TableContainer>
-                    }
-                  </Box>
+                    width: '100%',
+                  }}>
+                  <TableContainer>
+                    <Table>
+                      <tbody>
+                        <TableRow sx={{ margin: 2 }}>
+                          <TableCell align='left'>
+                            <Typography fontSize={14} fontWeight={'bold'}>REMOVE</Typography>
+                          </TableCell>
+                          <TableCell align='left' sx={{ width: 120 }}>code</TableCell>
+                          <TableCell align='left'>name</TableCell>
+                          <TableCell align='left'>credit</TableCell>
+                        </TableRow>
+                        {subStudy ? subStudy.map((substd) => (
+                          <TableRow key={substd.sub_study_id} sx={{ margin: 2 }}>
+                            <TableCell align='left'>
+                              <Button onClick={() => handleDeleteSubStudy(substd.sub_study_id)} variant='outlined'>X</Button>
+                            </TableCell>
+                            <TableCell align='left' sx={{ width: 120 }}>{substd.subject_code}</TableCell>
+                            <TableCell align='left'>{substd.subject_name_th}</TableCell>
+                            <TableCell align='left'>{substd.credit_qty}</TableCell>
+                          </TableRow>
+                        ))
+                          : <TableRow><TableCell colSpan={3}>ไม่มีรายวิชาในแผนแนะนำ</TableCell></TableRow>
+                        }
+                      </tbody>
+                    </Table>
+                  </TableContainer>
+                  {/* } */}
                 </Box>
               </Box>
-            </TabPanel>
-          ))}
-          {/* <TabPanel key={'content 2'} value={(2).toString()}>
-            <Box
-              sx={{
-                display: 'flex',
-                p: 2,
-                m: 2,
-              }}
-            >
-              <Typography>test2</Typography>
             </Box>
           </TabPanel>
-          <TabPanel key={'content 3'} value={(3).toString()}>
-            <Typography>test3</Typography>
-          </TabPanel>
-          <TabPanel key={'content 4'} value={(4).toString()}>
-            <Typography>test4</Typography>
-          </TabPanel>
-          <TabPanel key={'content 5'} value={(5).toString()}>
-            <Typography>test5</Typography>
-          </TabPanel>
-          <TabPanel key={'content 6'} value={(6).toString()}>
-            <Typography>test6</Typography>
-          </TabPanel>
-          <TabPanel key={'content 7'} value={(7).toString()}>
-            <Typography>test7</Typography>
-          </TabPanel>
-          <TabPanel key={'content 8'} value={(8).toString()}>
-            <Typography>test8</Typography>
-          </TabPanel> */}
         </TabContext>
       </Box>
     </PapperBlock>

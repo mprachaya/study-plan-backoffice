@@ -7,31 +7,34 @@ export const useFetch = (url, payload) => {
   const [resData, setResData] = useState([]);
 
   useEffect(() => {
-    if (payload !== '') {
-      setLoading(true);
-      axios.post(url, payload).then(res => {
-        setResData(() => (res.data));
-      }).catch((err) => {
-        setError(err);
-      }).finally(() => {
-        setLoading(false);
-      });
-    } else {
-      setLoading(true);
-      axios.post(url).then(res => {
-        setResData(() => (res.data));
-      }).catch((err) => {
-        setError(err);
-      }).finally(() => {
-        setLoading(false);
-      });
-    }
+    const fetchData = async () => {
+      if (payload !== '') {
+        setLoading(true);
+        await axios.post(url, payload).then(res => {
+          setResData(() => (res.data));
+        }).catch((err) => {
+          setError(err);
+        }).finally(() => {
+          setLoading(false);
+        });
+      } else {
+        setLoading(true);
+        await axios.post(url).then(res => {
+          setResData(() => (res.data));
+        }).catch((err) => {
+          setError(err);
+        }).finally(() => {
+          setLoading(false);
+        });
+      }
+    };
+    fetchData();
   }, [url]);
 
-  const refetch = (newurl, newpayload) => {
+  const refetch = async (newurl, newpayload) => {
     if (newpayload !== '') {
       setLoading(true);
-      axios.post(newurl, newpayload).then(res => {
+      await axios.post(newurl, newpayload).then(res => {
         setResData(() => (res.data));
       }).catch((err) => {
         setError(err);
@@ -40,7 +43,7 @@ export const useFetch = (url, payload) => {
       });
     } else {
       setLoading(true);
-      axios.post(newurl).then(res => {
+      await axios.post(newurl).then(res => {
         setResData(() => (res.data));
       }).catch((err) => {
         setError(err);

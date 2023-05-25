@@ -19,6 +19,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles()((theme) => ({
@@ -286,6 +287,7 @@ export default function TbPagination(props) {
                     </TableCell>
                   )
                 ))}
+                <TableCell align='center'><TextSnippetIcon/></TableCell>
                 <TableCell align='center'><SettingsIcon/></TableCell>
               </TableRow>
               {dataLength !== 0 ? (
@@ -334,7 +336,18 @@ export default function TbPagination(props) {
                       </TableCell>
                       <TableCell
                         align='center'>
-                        <Link to='/app/planmanagement'>
+                        <Link to='/app/studyplan/plandetail'>
+                          <Button
+                            variant='text'
+                            onClick={() => passToPlanManagement(row)}
+                          >
+                            detail
+                          </Button>
+                        </Link>
+                      </TableCell>
+                      <TableCell
+                        align='center'>
+                        <Link to='/app/studyplan/planmanagement'>
                           <Button
                             variant='text'
                             onClick={() => passToPlanManagement(row)}
