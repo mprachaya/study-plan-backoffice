@@ -15,6 +15,7 @@ import {
   Typography
 } from '@mui/material';
 import axios from 'axios';
+import Tooltip from '@mui/material/Tooltip';
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import SearchIcon from '@mui/icons-material/Search';
@@ -35,6 +36,16 @@ function PlanManagement() {
   const { resData: Subjects } = useFetch(`${url.apiPart + 'subjects'}`, { curriculum_id: JSON.parse(localStorage.getItem('curriculum_id')), subject_id: '' }); // for add selection
   const { resData: SubPlan, refetch: reSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: 1, sub_study_year: 1 }); // select subplan by semester and year by studyplan
   const { resData: AllSubPlan, refetch: reAllSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' }); // select all subplan by studyplan to make add menu filter
+  // const electiveSubjects = [
+  //   {id: 200, name: 'วิชาชีพเลือก1'},
+  //   {id: 201, name: 'วิชาชีพเลือก2'},
+  //   {id: 202, name: 'วิชาชีพเลือก3'},
+  //   {id: 203, name: 'วิชาชีพเลือก4'},
+  // ]
+  const freeSubjects = [
+    { id: 204, name: 'วิชาเลือกเสรี1' },
+    { id: 205, name: 'วิชาเลือกเสรี2' },
+  ];
 
   const handleAddSubStudy = (id) => {
     axios.post(url.apiPart + 'substudy_create',
@@ -51,6 +62,30 @@ function PlanManagement() {
       reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
       reAllSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' });
     });
+  };
+
+  const addSpecialSubject = (mode) => {
+    if (mode === 'freesubject') {
+      // check free subject in subplan
+      const checkDuplicate = freeSubjects.filter(fs => subStudy.find(ss => ss.subject_id === fs.id));
+      console.log('checkDuplicate: ', checkDuplicate);
+      console.log('freeSubjects: ', freeSubjects);
+      if (checkDuplicate.length > 0 && checkDuplicate.length !== freeSubjects.length) {
+        const filterDuplicate = freeSubjects.filter(cd => checkDuplicate.find(fs2 => fs2.id !== cd.id));
+        console.log('filterDuplicate: ', filterDuplicate);
+        // insert first object of filterDuplicate
+        // handleAddSubStudy(filterDuplicate[0].id);
+        // console.log(filterDuplicate[0].id);
+      } else {
+        console.log('insert first freesubject');
+        // handleAddSubStudy(freeSubjects[0].id);
+      } if (checkDuplicate.length === freeSubjects.length) {
+        console.log('show warning modal!');
+      }
+      // if not have any free subject sent first free subject else sent next free subject id for insert
+    } else if (mode === 'electivesubject') {
+      console.log('test');
+    }
   };
 
   const handleDeleteSubStudy = (subId) => {
@@ -124,7 +159,7 @@ function PlanManagement() {
         sx={{
           width: '100%',
           height: '100vh',
-          p: 6,
+          p: 2,
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -145,6 +180,9 @@ function PlanManagement() {
               borderColor: 'divider'
             }}>
             <TabList
+              TabIndicatorProps={{
+                style: { transition: 'none', display: 'none' }
+              }}
               onChange={handleChangeTabs}>
               <Tab onClick={() => getCurrentPosition(1, 1, 1)} key={1} label={'ปี 1/เทอม1'} value={(1).toString()}/>
               <Tab onClick={() => getCurrentPosition(1, 2, 2)} key={2} label={'ปี 1/เทอม2'} value={(2).toString()}/>
@@ -238,7 +276,9 @@ function PlanManagement() {
                             p: 1.5,
                           }}>
                           <Typography>{menu.subject_code + ' ' + menu.subject_name_th}</Typography>
-                          <Button onClick={() => handleAddSubStudy(menu.subject_id)}>+</Button>
+                          <Tooltip title="เพิ่มวิชาในแผน">
+                            <Button onClick={() => handleAddSubStudy(menu.subject_id)}>+</Button>
+                          </Tooltip>
                         </Box>
                       </ListItem>
                     ))
@@ -274,8 +314,16 @@ function PlanManagement() {
                     width: '100%',
                   }}
                 >
-                  <Typography fontWeight={'bold'} fontSize={14}>Plan Lists</Typography>
-                  <Typography mx={2} fontSize={14}>Total {totalCredit} credit</Typography>
+                  <Typography fontWeight={'bold'} fontSize={14} sx={{ width: 100 }}>Plan Lists</Typography>
+                  <Typography mx={2} fontSize={14} sx={{ width: 100 }}>Total {totalCredit} credit</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '70%' }}>
+                    <Tooltip title="เพิ่มวิชาพิเศษ">
+                      <Button onClick={() => addSpecialSubject('freesubject')} sx={{ mx: 1 }} color='info' variant='outlined'>วิชาเสรี(0/2)</Button>
+                    </Tooltip>
+                    <Tooltip title="เพิ่มวิชาพิเศษ">
+                      <Button sx={{ mx: 1 }} color='info' variant='contained'>วิชาเลือก(0/4)</Button>
+                    </Tooltip>
+                  </Box>
                 </Box>
                 <Box
                   sx={{
@@ -289,9 +337,9 @@ function PlanManagement() {
                           <TableCell align='left'>
                             <Typography fontSize={14} fontWeight={'bold'}>REMOVE</Typography>
                           </TableCell>
-                          <TableCell align='left' sx={{ width: 120 }}>code</TableCell>
+                          <TableCell align='left' sx={{ width: 80 }}>code</TableCell>
                           <TableCell align='left'>name</TableCell>
-                          <TableCell align='left'>credit</TableCell>
+                          <TableCell align='left' sx={{ width: 80 }}>credit</TableCell>
                         </TableRow>
                         {subStudy ? subStudy.map((substd) => (
                           <TableRow key={substd.sub_study_id} sx={{ margin: 2 }}>
