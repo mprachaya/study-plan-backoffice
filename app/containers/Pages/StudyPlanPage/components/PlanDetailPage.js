@@ -90,9 +90,10 @@ function PlanDetailPage() {
                   <Table key={d.id} sx={{ minWidth: 650 }} size="small">
                     <tbody>
                       <TableRow>
-                        <TableCell colSpan={3} sx={{ textAlign: 'center' }}>ปี{d.year} เทอม{d.semester}</TableCell>
+                        <TableCell colSpan={3} sx={{ textAlign: d.subplan.length > 0 ? 'center' : 'left' }}>ปี{d.year} เทอม{d.semester}</TableCell>
                       </TableRow>
-                      <TableRow sx={{ margin: 2, mx: 2 }}>
+                      {d.subplan.length > 0
+                      && <TableRow sx={{ margin: 2, mx: 2 }}>
                         <TableCell align='left' sx={{ width: 200 }}>
                           <Typography fontSize={14} fontWeight={'bold'}>code</Typography>
                         </TableCell>
@@ -103,7 +104,8 @@ function PlanDetailPage() {
                           <Typography fontSize={14} fontWeight={'bold'}>credit</Typography>
                         </TableCell>
                       </TableRow>
-                      {d.subplan ? d.subplan.map((da, index) => (
+                      }
+                      {d.subplan.length !== 0 ? d.subplan.map((da, index) => (
                         <Fragment key={da.sub_study_id} >
                           <TableRow sx={{ margin: 2, mx: 2 }}>
                             <TableCell align='left'>

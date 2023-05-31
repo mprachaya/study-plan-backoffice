@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { PapperBlock } from 'dan-components';
 import {
+  Alert,
   Box,
   Button,
   IconButton,
   ListItem,
   MenuList,
+  Stack,
   Tab,
   Table,
   TableCell,
@@ -36,55 +38,104 @@ function PlanManagement() {
   const { resData: Subjects } = useFetch(`${url.apiPart + 'subjects'}`, { curriculum_id: JSON.parse(localStorage.getItem('curriculum_id')), subject_id: '' }); // for add selection
   const { resData: SubPlan, refetch: reSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: 1, sub_study_year: 1 }); // select subplan by semester and year by studyplan
   const { resData: AllSubPlan, refetch: reAllSubPlan } = useFetch(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' }); // select all subplan by studyplan to make add menu filter
-  // const electiveSubjects = [
-  //   {id: 200, name: 'วิชาชีพเลือก1'},
-  //   {id: 201, name: 'วิชาชีพเลือก2'},
-  //   {id: 202, name: 'วิชาชีพเลือก3'},
-  //   {id: 203, name: 'วิชาชีพเลือก4'},
-  // ]
-  const freeSubjects = [
-    { id: 204, name: 'วิชาเลือกเสรี1' },
-    { id: 205, name: 'วิชาเลือกเสรี2' },
+  const electiveSubjects = [
+    { id: 200, name: 'วิชาชีพเลือก1', credit: 3 },
+    { id: 201, name: 'วิชาชีพเลือก2', credit: 3 },
+    { id: 202, name: 'วิชาชีพเลือก3', credit: 3 },
+    { id: 203, name: 'วิชาชีพเลือก4', credit: 3 },
   ];
+  const freeSubjects = [
+    { id: 204, name: 'วิชาเลือกเสรี1', credit: 3 },
+    { id: 205, name: 'วิชาเลือกเสรี2', credit: 3 },
+  ];
+  // const [electiveSjLimit, setElectiveSjLimit] = useState(0);
+  const creditLimit = 22;
+  const freeSjLimit = freeSubjects.length;
+  const electiveLimit = electiveSubjects.length;
+  const [freeSjCount, setFreeSjCount] = useState(0);
+  const [electiveCount, setElectiveCount] = useState(0);
 
-  const handleAddSubStudy = (id) => {
-    axios.post(url.apiPart + 'substudy_create',
-      {
-        study_plan_id: planId,
-        subject_id: id,
-        sub_study_semester: semester,
-        sub_study_year: year
-      }).then(res => {
-      console.log(res);
-    }).catch((err) => {
-      console.log(err);
-    }).finally(() => {
-      reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
-      reAllSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' });
-    });
+  const [limitAlert, setLimitAlert] = useState({
+    freeSubject: false,
+    electiveSubject: false,
+    maxCredit: false,
+  });
+
+  const handleAddSubStudy = (id, credit) => {
+    console.log('sumCredit ', totalCredit + ' ' + credit);
+    if ((totalCredit + credit) <= creditLimit) {
+      setLimitAlert(pre => ({ ...pre, maxCredit: false }));
+      axios.post(url.apiPart + 'substudy_create',
+        {
+          study_plan_id: planId,
+          subject_id: id,
+          sub_study_semester: semester,
+          sub_study_year: year
+        }).then(res => {
+        console.log(res);
+      }).catch((err) => {
+        console.log(err);
+      }).finally(() => {
+        reSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: semester, sub_study_year: year });
+        reAllSubPlan(`${url.apiPart + 'substudy'}`, { study_plan_id: JSON.parse(localStorage.getItem('study_plan_id')), sub_study_semester: '', sub_study_year: '' });
+      });
+    } else {
+      setLimitAlert(pre => ({ ...pre, maxCredit: true }));
+    }
   };
 
   const addSpecialSubject = (mode) => {
     if (mode === 'freesubject') {
+      console.log('mode = freesubject');
       // check free subject in subplan
-      const checkDuplicate = freeSubjects.filter(fs => subStudy.find(ss => ss.subject_id === fs.id));
-      console.log('checkDuplicate: ', checkDuplicate);
-      console.log('freeSubjects: ', freeSubjects);
-      if (checkDuplicate.length > 0 && checkDuplicate.length !== freeSubjects.length) {
-        const filterDuplicate = freeSubjects.filter(cd => checkDuplicate.find(fs2 => fs2.id !== cd.id));
-        console.log('filterDuplicate: ', filterDuplicate);
-        // insert first object of filterDuplicate
-        // handleAddSubStudy(filterDuplicate[0].id);
-        // console.log(filterDuplicate[0].id);
+      if (AllSubPlan.data !== undefined) {
+        const checkDuplicate = freeSubjects.filter(fs => AllSubPlan.data.find(ss => ss.subject_id === fs.id));
+        const filterDuplicate = freeSubjects.filter(cd => !checkDuplicate.find(fs2 => fs2.id === cd.id));
+        console.log('checkDuplicate: ', checkDuplicate);
+        console.log('freeSubjects: ', freeSubjects);
+        if (checkDuplicate.length === 0) { handleAddSubStudy(freeSubjects[0].id, freeSubjects[0].credit); }
+        if (checkDuplicate.length > 0 && checkDuplicate.length !== freeSjLimit) {
+          setLimitAlert(pre => ({ ...pre, freeSubject: false }));
+          console.log('filterDuplicate: ', filterDuplicate);
+          // insert first object of filterDuplicate
+          handleAddSubStudy(filterDuplicate[0].id, filterDuplicate[0].credit);
+          // console.log(filterDuplicate[0].id);
+        } else if (freeSjCount === freeSjLimit) {
+          console.log('show warning modal!');
+          setLimitAlert(pre => ({ ...pre, freeSubject: true }));
+        } else {
+          setLimitAlert(pre => ({ ...pre, freeSubject: false }));
+        }
       } else {
-        console.log('insert first freesubject');
-        // handleAddSubStudy(freeSubjects[0].id);
-      } if (checkDuplicate.length === freeSubjects.length) {
-        console.log('show warning modal!');
+        setLimitAlert(pre => ({ ...pre, freeSubject: false }));
+        handleAddSubStudy(freeSubjects[0].id, freeSubjects[0].credit);
       }
+    } else if (mode === 'electivesubject' && AllSubPlan.data.length !== 0) {
       // if not have any free subject sent first free subject else sent next free subject id for insert
-    } else if (mode === 'electivesubject') {
-      console.log('test');
+      // check elective subject in subplan
+      console.log('mode = electivesubject');
+      if (AllSubPlan.data !== undefined) {
+        const checkDuplicate = electiveSubjects.filter(fs => AllSubPlan.data.find(ss => ss.subject_id === fs.id));
+        const filterDuplicate = electiveSubjects.filter(cd => !checkDuplicate.find(fs2 => fs2.id === cd.id));
+        console.log('checkDuplicate: ', checkDuplicate);
+        console.log('electiveSubjects: ', electiveSubjects);
+        if (checkDuplicate.length === 0) { handleAddSubStudy(electiveSubjects[0].id, electiveSubjects[0].credit); }
+        if (checkDuplicate.length > 0 && checkDuplicate.length !== electiveLimit) {
+          setLimitAlert(pre => ({ ...pre, electiveSubject: false }));
+          console.log('filterDuplicate: ', filterDuplicate);
+          // insert first object of filterDuplicate
+          handleAddSubStudy(filterDuplicate[0].id, filterDuplicate[0].credit);
+          // console.log(filterDuplicate[0].id);
+        } else if (electiveCount === electiveLimit) {
+          console.log('show warning modal!');
+          setLimitAlert(pre => ({ ...pre, electiveSubject: true }));
+        } else {
+          setLimitAlert(pre => ({ ...pre, electiveSubject: false }));
+        }
+      } else {
+        setLimitAlert(pre => ({ ...pre, electiveSubject: false }));
+        handleAddSubStudy(electiveSubjects[0].id, electiveSubjects[0].credit);
+      }
     }
   };
 
@@ -111,6 +162,14 @@ function PlanManagement() {
   };
 
   const getCurrentPosition = (positionYear, positionSemester, value) => {
+    setLimitAlert(pre => (
+      {
+        ...pre,
+        freeSubject: false,
+        electiveSubject: false,
+        maxCredit: false
+      }
+    ));
     setYear(positionYear);
     setSemester(positionSemester);
     setDynamicTab(value);
@@ -122,12 +181,21 @@ function PlanManagement() {
 
   useEffect(() => {
     if (Subjects.data !== undefined) {
-      console.log('Subjects: ', Subjects.data);
+      // console.log('Subjects: ', Subjects.data);
       if (AllSubPlan.data !== undefined) {
         const filterMenu = (Subjects.data).filter(raw => !(AllSubPlan.data).find((data) => raw.subject_id === data.subject_id));
-        console.log('AllSubPlan: ', AllSubPlan.data);
-        console.log('filterMenu: ', filterMenu);
+        const countFSJ = (AllSubPlan.data).filter(fil => freeSubjects.find(c => fil.subject_id === c.id)).length;
+        const countELTSJ = (AllSubPlan.data).filter(fil => electiveSubjects.find(c => fil.subject_id === c.id)).length;
         setMenuSubjects(filterMenu);
+        setFreeSjCount(countFSJ);
+        setElectiveCount(countELTSJ);
+        // console.log('FSJ Count: ', countFSJ);
+        // console.log('AllSubPlan: ', AllSubPlan.data);
+        console.log('filterMenu: ', filterMenu);
+      } else {
+        setMenuSubjects(Subjects.data);
+        setFreeSjCount(0);
+        setElectiveCount(0);
       }
     }
   }, [Subjects, AllSubPlan]);
@@ -141,7 +209,7 @@ function PlanManagement() {
 
   useEffect(() => {
     if (subStudy !== undefined) {
-      console.log(subStudy);
+      // console.log(subStudy);
       setTotalCredit(subStudy.reduce((prev, current) => prev + current.credit_qty, 0));
       // setTotalCredit(1);
     } else {
@@ -158,8 +226,7 @@ function PlanManagement() {
       <Box
         sx={{
           width: '100%',
-          height: '100vh',
-          p: 2,
+          height: '150vh',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -194,6 +261,11 @@ function PlanManagement() {
               <Tab onClick={() => getCurrentPosition(4, 2, 8)} key={8} label={'ปี 4/เทอม2'} value={(8).toString()}/>
             </TabList>
           </Box>
+          <Stack sx={{ width: '100%' }} spacing={2}>
+            {limitAlert.maxCredit && <Alert severity="error">เกินหน่วยกิตที่เหมาะสม ไม่สามารถเพิ่มรายวิชาในแผน ปี{year}/เทอม{semester}</Alert>}
+            {limitAlert.freeSubject && <Alert severity="warning">วิชาเสรีเกินขอบเขตที่สามารถเพิ่มได้ในแผนแนะนำนี้</Alert>}
+            {limitAlert.electiveSubject && <Alert severity="warning">วิชาเลือกเกินขอบเขตที่สามารถเพิ่มได้ในแผนแนะนำนี้</Alert>}
+          </Stack>
           <TabPanel key={dynamicTab} value={(dynamicTab).toString()}>
             <Box
               sx={{
@@ -209,6 +281,7 @@ function PlanManagement() {
                   p: 4,
                   m: 2,
                   width: '400px',
+                  height: '600px',
                   boxShadow: 4,
                   borderRadius: 2,
                 }}>
@@ -216,8 +289,9 @@ function PlanManagement() {
                   sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
                     width: '100%',
-                    height: '40px',
+                    height: '80px',
                   }}>
                   <Typography
                     sx={{
@@ -226,6 +300,7 @@ function PlanManagement() {
                       opacity: '80%',
                       my: 2,
                       ml: 2,
+                      width: '100px'
                     }}
                   >
                     Subjects
@@ -269,7 +344,7 @@ function PlanManagement() {
                       <ListItem key={menu.subject_id}>
                         <Box
                           sx={{
-                            width: '100%',
+                            width: '420px',
                             display: 'flex',
                             justifyContent: 'space-between',
                             boxShadow: 1,
@@ -277,7 +352,7 @@ function PlanManagement() {
                           }}>
                           <Typography>{menu.subject_code + ' ' + menu.subject_name_th}</Typography>
                           <Tooltip title="เพิ่มวิชาในแผน">
-                            <Button onClick={() => handleAddSubStudy(menu.subject_id)}>+</Button>
+                            <Button onClick={() => handleAddSubStudy(menu.subject_id, menu.credit_qty)}>+</Button>
                           </Tooltip>
                         </Box>
                       </ListItem>
@@ -315,13 +390,13 @@ function PlanManagement() {
                   }}
                 >
                   <Typography fontWeight={'bold'} fontSize={14} sx={{ width: 100 }}>Plan Lists</Typography>
-                  <Typography mx={2} fontSize={14} sx={{ width: 100 }}>Total {totalCredit} credit</Typography>
+                  <Typography mx={2} fontSize={14} sx={{ width: 160 }}>Total {totalCredit} credit /{creditLimit}</Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '70%' }}>
                     <Tooltip title="เพิ่มวิชาพิเศษ">
-                      <Button onClick={() => addSpecialSubject('freesubject')} sx={{ mx: 1 }} color='info' variant='outlined'>วิชาเสรี(0/2)</Button>
+                      <Button onClick={() => addSpecialSubject('freesubject')} sx={{ mx: 1 }} color='info' variant='outlined'>วิชาเสรี({freeSjCount + '/' + freeSjLimit})</Button>
                     </Tooltip>
                     <Tooltip title="เพิ่มวิชาพิเศษ">
-                      <Button sx={{ mx: 1 }} color='info' variant='contained'>วิชาเลือก(0/4)</Button>
+                      <Button onClick={() => addSpecialSubject('electivesubject')} sx={{ mx: 1 }} color='info' variant='contained'>วิชาเลือก({electiveCount + '/' + electiveLimit})</Button>
                     </Tooltip>
                   </Box>
                 </Box>
