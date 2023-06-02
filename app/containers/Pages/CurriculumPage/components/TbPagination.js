@@ -14,6 +14,8 @@ import TextField from '@mui/material/TextField';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SearchIcon from '@mui/icons-material/Search';
+import { useHistory } from 'react-router';
+// import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -55,6 +57,7 @@ export default function TbPagination(props) {
   const [data, setData] = React.useState([]);
   const [dataLength, setDataLenght] = React.useState(0);
   const [textSearch, setTextSearch] = React.useState('');
+  const history = useHistory();
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -162,9 +165,10 @@ export default function TbPagination(props) {
               <TableRow >
                 <TableCell align="left">EDIT</TableCell>
                 <TableCell align="left">DELETE</TableCell>
+                <TableCell align="left" sx={{ minWidth: 120 }}>STRUCTURE</TableCell>
                 {colums.map((columName, index) => (
-                  index === 0 ? <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
-                    : <TableCell onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                  index === 0 ? <TableCell sx={{ minWidth: 120 }} onClick={() => handleSort(columName)} key={columName.column} id={index} component="th" scope="row">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
+                    : <TableCell sx={{ minWidth: 120 }} onClick={() => handleSort(columName)} key={columName.column} id={index} align="left">{columName.name}{columSelected === columName.column && toggle === false ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</TableCell>
                 )
                 )}
               </TableRow>
@@ -178,8 +182,9 @@ export default function TbPagination(props) {
                       tabIndex={-1}
                       key={row.curriculum_id}
                     >
-                      <TableCell align="left"><Button variant="contained" onClick={() => openFormUpdate(row.curriculum_id, row.faculty_id, row.student_cur_group_id, row.curriculum_name_th, row.curriculum_name_en, row.curriculum_year)}>edit</Button></TableCell>
-                      <TableCell align="left" ><Button variant="outlined" onClick={() => openAlertDialog(row.curriculum_id, row.curriculum_name_th, row.curriculum_year)}>delete</Button></TableCell>
+                      <TableCell align="left"><Button size={'small'} variant="contained" onClick={() => openFormUpdate(row.curriculum_id, row.faculty_id, row.student_cur_group_id, row.curriculum_name_th, row.curriculum_name_en, row.curriculum_year)}>edit</Button></TableCell>
+                      <TableCell align="left" ><Button size={'small'} variant="outlined" onClick={() => openAlertDialog(row.curriculum_id, row.curriculum_name_th, row.curriculum_year)}>delete</Button></TableCell>
+                      <TableCell align="left"><Button onClick={() => history.push('/app/curriculum-page/structure-page', { curriculum_name_th: row.group_short_name_th + ' ' + row.curriculum_year }) } size={'small'} variant="outlined" color="secondary">config</Button></TableCell>
                       <TableCell component="th" id={labelId} scope="row">
                         {row.curriculum_name_th}
                       </TableCell>

@@ -13,7 +13,8 @@ import {
   GroupTypePage,
   StudyPlanPage,
   PlanManagement,
-  PlanDetailPage
+  PlanDetailPage,
+  StructurePage
   // RelationPage,
   // DashboardPage
 } from '../pageListAsync';
@@ -25,6 +26,7 @@ function Application(props) {
     <Dashboard history={history} changeMode={changeMode}>
       <Switch>
         <Route exact path="/app" component={CurriculumPage} />
+        <Route path="/app/curriculum-page/structure-page" component={StructurePage} />
         <Route exact path="/app/curriculum-page" component={CurriculumPage} />
         <Route path="/app/faculty-page" component={FacultyPage} />
         <Route path="/app/studentgroup-page" component={StudentCurrentGroupPage} />
